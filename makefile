@@ -4,7 +4,7 @@ CXXFLAGS = -std=c++17 -I/opt/homebrew/Cellar/sfml/2.6.2/include
 LDFLAGS = -L/opt/homebrew/Cellar/sfml/2.6.2/lib -lsfml-graphics -lsfml-window -lsfml-system
 
 # Target name
-TARGET = prog
+TARGET = mine
 TARGET2 = test
 
 # Source files
