@@ -1,11 +1,9 @@
 // Libraries
 #include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Network.hpp>
-#include <SFML/Window.hpp>
 #include <vector>
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 // Preprocessor Variables
 #define GRIDSIZE 200
@@ -21,31 +19,59 @@ using namespace std;
 
 
 // Global Variables
-std::vector<std::vector<float>> grid(GRIDSIZE, std::vector<float>(GRIDSIZE, 0.0f));
-
+vector<vector<float>> grid(GRIDSIZE, vector<float>(GRIDSIZE, 0.0f));
+vector<pair<int, int>> coords;
 
 // Function to randomise vector for rock strengths
 void randomise(){
 
     for (int i = 0; i < RANDNUM; i++){
-        std::random_device rd; 
-        std::mt19937 gen(rd()); 
+        random_device rd; 
+        mt19937 gen(rd()); 
 
-        std::uniform_int_distribution<> distrib(0, GRIDSIZE-1);
+        uniform_int_distribution<> distrib(0, GRIDSIZE-1);
 
         int randX = distrib(gen);
         int randY = distrib(gen);
 
-        for (int dx = -2; dx < 3; dx++) {
-            for (int dy = -2; dy < 3; dy++) {
-                int newX = randX + dx;
-                int newY = randY + dy;
-                if (newX >= 0 && newX < GRIDSIZE && newY >= 0 && newY < GRIDSIZE) {
-                    grid[newX][newY] = 10.f;
-                }
+        int offsets[5][2] = {
+            {0, 0},   
+            {1, 0},   
+            {-1, 0},  
+            {0, 1},   
+            {0, -1}   
+        };
+
+        for (auto& offset : offsets) {
+            int newX = randX + offset[0];
+            int newY = randY + offset[1];
+            if (newX >= 0 && newX < GRIDSIZE && newY >= 0 && newY < GRIDSIZE) {
+                grid[newX][newY] = 100.f;
+                coords.emplace_back(newX, newY);
             }
         }
     }
+
+}
+
+float getDistance(int x, int y){
+
+    int min = 99999;
+    int vSize = coords.size();
+
+    for (int i= 0; i < vSize; i++){
+
+        int tempX = coords[i].first;
+        int tempY = coords[i].second;
+
+        float temp = sqrt((x - tempX) * (x - tempX) + (y - tempY) * (y - tempY));
+
+        if (temp < min){
+            min = temp;
+        }
+    }
+
+    return min;
 }
 
 // Main Function
@@ -53,7 +79,6 @@ int main(){
     randomise();
     sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation");
     window.setFramerateLimit(FRAMELIMIT);
-
 
     while(window.isOpen()){
         
@@ -68,25 +93,30 @@ int main(){
 
         for (int x = 0; x < GRIDSIZE; x++){
             for (int y = 0; y < GRIDSIZE; y++){
+                
+                grid[x][y] = getDistance(x,y);
 
                 sf::RectangleShape block;
                 block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
                 block.setPosition(x*MULTIPLYFACTOR,y*MULTIPLYFACTOR);
                 if (grid[x][y] == 0){
-                    block.setFillColor(sf::Color::White);
+                    block.setFillColor(sf::Color::Green);
                 }
 
                 else {
-                    block.setFillColor(sf::Color::Black);
+                    block.setFillColor(sf::Color::White);
                 }
 
                 window.draw(block);
 
+            }
         }
-    }
 
         window.display();
+
     }
+
+    
 
     return 0;
 }

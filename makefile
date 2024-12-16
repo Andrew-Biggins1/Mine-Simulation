@@ -12,14 +12,14 @@ SRC = main.cpp
 SRC2 = test.cpp
 
 # Default rule
-all: $(TARGET) #$(TARGET2)
+all: $(TARGET) $(TARGET2)
 
 # Compile and link
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
 
-#$(TARGET2): $(SRC2)
-#	$(CXX) $(CXXFLAGS) -o $(TARGET2) $(SRC2) $(LDFLAGS)
+$(TARGET2): $(SRC2)
+	$(CXX) $(CXXFLAGS) -o $(TARGET2) $(SRC2) $(LDFLAGS)
 
 # Clean rule
 clean:
