@@ -109,12 +109,22 @@ int main(){
                 if (grid[x][y] == 0){
                     block.setFillColor(sf::Color(0,255,0));
                 }
-else if( grid[x][y] < 30){
-                    block.setFillColor(sf::Color(255-(255/grid[x][y]), 255, 0));
+                if (grid[x][y] < 30) {
+                    // Normalize grid[x][y] to the range [0, 1]
+                    float factor = grid[x][y] / 30.0f;
+                    // Interpolate from green to yellow
+                    int red = static_cast<int>((255 * factor) * 1.0f);
+                    int green = 255; // Full green
+                    block.setFillColor(sf::Color(red, green, 0));
                 }
-                
-                else if(grid[x][y] < 60){
-                    block.setFillColor(sf::Color(255, 255-(255/grid[x][y]) ,0));
+
+                else if (grid[x][y] < 100) {
+                    // Normalize grid[x][y] to the range [0, 1]
+                    float factor = (grid[x][y] - 30.0f) / 70.0f; // Normalizing for the range 30 to 100
+                    // Interpolate from yellow to red
+                    int red = 255; // Full red
+                    int green = static_cast<int>(255 * (1 - factor * 1.0f));
+                    block.setFillColor(sf::Color(red, green, 0));
                 }
 
 
