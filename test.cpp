@@ -15,9 +15,9 @@
 #define RANDNUM 20
 #define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
-
 // Namespaces
 using namespace std;
+
 // Global Variables
 std::vector<std::vector<float>> grid(GRIDSIZE, std::vector<float>(GRIDSIZE, 0.0f));
 std::vector<std::pair<int, int>> greenCrosses; // Store positions of green crosses

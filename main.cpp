@@ -4,13 +4,14 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <array>
 
 // Preprocessor Variables
 #define GRIDSIZE 200
 #define WINDOWSIZE 800
 #define FRAMELIMIT 60
 #define BLOCKSIZE 10
-#define RANDNUM 20
+#define RANDNUM 15
 #define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
 
@@ -54,6 +55,7 @@ void randomise(){
 
 }
 
+//Calculate Eculidean distance
 float getDistance(int x, int y){
 
     int min = 99999;
@@ -74,11 +76,16 @@ float getDistance(int x, int y){
     return min;
 }
 
+// Create Colours
+
+
 // Main Function
 int main(){
     randomise();
     sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation");
     window.setFramerateLimit(FRAMELIMIT);
+
+
 
     while(window.isOpen()){
         
@@ -100,8 +107,16 @@ int main(){
                 block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
                 block.setPosition(x*MULTIPLYFACTOR,y*MULTIPLYFACTOR);
                 if (grid[x][y] == 0){
-                    block.setFillColor(sf::Color::Green);
+                    block.setFillColor(sf::Color(0,255,0));
                 }
+else if( grid[x][y] < 30){
+                    block.setFillColor(sf::Color(255-(255/grid[x][y]), 255, 0));
+                }
+                
+                else if(grid[x][y] < 60){
+                    block.setFillColor(sf::Color(255, 255-(255/grid[x][y]) ,0));
+                }
+
 
                 else {
                     block.setFillColor(sf::Color::White);
@@ -116,7 +131,17 @@ int main(){
 
     }
 
-    
+    /*
+    vector<int> temp;
+
+    for (int i = 0; i < GRIDSIZE; i++){
+        for (int k = 0; k < GRIDSIZE; k++){
+            temp.push_back(grid[i][k]);
+        }
+    }
+
+    cout << *max_element(temp.begin(), temp.end()) << endl;
+    */
 
     return 0;
 }
