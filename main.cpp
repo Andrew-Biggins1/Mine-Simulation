@@ -11,7 +11,7 @@
 #define WINDOWSIZE 800
 #define FRAMELIMIT 60
 #define BLOCKSIZE 10
-#define RANDNUM 15
+#define RANDNUM 10
 #define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
 
@@ -55,7 +55,7 @@ void randomise(){
 
 }
 
-//Calculate Eculidean distance
+// Calculate Eculidean distance
 float getDistance(int x, int y){
 
     int min = 99999;
@@ -76,9 +76,6 @@ float getDistance(int x, int y){
     return min;
 }
 
-// Create Colours
-
-
 // Main Function
 int main(){
     randomise();
@@ -92,8 +89,28 @@ int main(){
         sf::Event event;
 
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            switch (event.type){
+
+            case sf::Event::Closed:
                 window.close();
+                break;
+            
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+
+                    int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
+                    int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
+
+                    cout << "x: " << x << ", ";
+                    cout << "y: " << y << ", ";
+                    cout << "dmg: " << grid[x][y] << endl; 
+                }
+                break;
+
+            default:
+                break;
+
+            }
         }
 
         window.clear(sf::Color::Black);
@@ -109,20 +126,20 @@ int main(){
                 if (grid[x][y] == 0){
                     block.setFillColor(sf::Color(0,255,0));
                 }
-                if (grid[x][y] < 30) {
+                // Green/Yellow
+                else if (grid[x][y] < 30) {
                     // Normalize grid[x][y] to the range [0, 1]
                     float factor = grid[x][y] / 30.0f;
-                    // Interpolate from green to yellow
                     int red = static_cast<int>((255 * factor) * 1.0f);
-                    int green = 255; // Full green
+                    int green = 255;
                     block.setFillColor(sf::Color(red, green, 0));
                 }
 
-                else if (grid[x][y] < 100) {
+                // Yellow/Red
+                else if (grid[x][y] < 150) {
                     // Normalize grid[x][y] to the range [0, 1]
-                    float factor = (grid[x][y] - 30.0f) / 70.0f; // Normalizing for the range 30 to 100
-                    // Interpolate from yellow to red
-                    int red = 255; // Full red
+                    float factor = (grid[x][y] - 30.0f) / 120.0f; // Last float must be < x - above statement < y
+                    int red = 255; 
                     int green = static_cast<int>(255 * (1 - factor * 1.0f));
                     block.setFillColor(sf::Color(red, green, 0));
                 }
@@ -140,18 +157,6 @@ int main(){
         window.display();
 
     }
-
-    /*
-    vector<int> temp;
-
-    for (int i = 0; i < GRIDSIZE; i++){
-        for (int k = 0; k < GRIDSIZE; k++){
-            temp.push_back(grid[i][k]);
-        }
-    }
-
-    cout << *max_element(temp.begin(), temp.end()) << endl;
-    */
 
     return 0;
 }

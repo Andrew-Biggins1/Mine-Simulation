@@ -12,7 +12,7 @@
 #define WINDOWSIZE 800
 #define FRAMELIMIT 60
 #define BLOCKSIZE 10
-#define RANDNUM 20
+#define RANDNUM 5
 #define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
 // Namespaces
@@ -95,9 +95,24 @@ int main() {
         sf::Event event;
 
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            switch (event.type){
+
+            case sf::Event::Closed:
                 window.close();
+                break;
+            
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    std::cout << "Here" << std::endl;
+                }
+                break;
+
+            default:
+                break;
+
+            }
         }
+
 
         window.clear(sf::Color::Black);
 
