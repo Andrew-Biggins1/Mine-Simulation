@@ -22,6 +22,7 @@ using namespace std;
 // Global Variables
 vector<vector<float>> grid(GRIDSIZE, vector<float>(GRIDSIZE, 0.0f));
 vector<pair<int, int>> coords;
+int strength = 0;
 
 // Function to randomise vector for rock strengths
 void randomise(){
@@ -32,9 +33,6 @@ void randomise(){
 
         uniform_int_distribution<> distrib(0, GRIDSIZE-1);
 
-        int randX = distrib(gen);
-        int randY = distrib(gen);
-
         int offsets[5][2] = {
             {0, 0},   
             {1, 0},   
@@ -42,6 +40,10 @@ void randomise(){
             {0, 1},   
             {0, -1}   
         };
+
+
+        int randX = distrib(gen);
+        int randY = distrib(gen);
 
         for (auto& offset : offsets) {
             int newX = randX + offset[0];
@@ -55,7 +57,7 @@ void randomise(){
 
 }
 
-// Calculate Eculidean distance
+// Calculate Euclidean distance
 float getDistance(int x, int y){
 
     int min = 99999;
@@ -77,7 +79,15 @@ float getDistance(int x, int y){
 }
 
 // Main Function
-int main(){
+int main(int argc, char* argv[]){
+
+    if (argc < 2){
+        cerr << "Usage " << argv[0] << ": Please provide an integer for seismic strength" << endl;
+        return -1;
+    }
+
+    strength = atoi(argv[1]);
+
     randomise();
     sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation");
     window.setFramerateLimit(FRAMELIMIT);

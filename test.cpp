@@ -1,139 +1,59 @@
-// Libraries
 #include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Network.hpp>
-#include <SFML/Window.hpp>
-#include <vector>
 #include <iostream>
-#include <random>
+#include <sstream>
+#include <thread>
+#include <mutex>
 
-// Preprocessor Variables
-#define GRIDSIZE 200
-#define WINDOWSIZE 800
-#define FRAMELIMIT 60
-#define BLOCKSIZE 10
-#define RANDNUM 5
-#define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
+// Global stream for simulating stdin
+std::stringstream mouseInput;
+std::mutex inputMutex;
 
-// Namespaces
-using namespace std;
-
-// Global Variables
-std::vector<std::vector<float>> grid(GRIDSIZE, std::vector<float>(GRIDSIZE, 0.0f));
-std::vector<std::pair<int, int>> greenCrosses; // Store positions of green crosses
-
-// Function to randomize vector for rock strengths
-void randomise() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, GRIDSIZE - 1);
-
-    for (int i = 0; i < RANDNUM; i++) {
-        int randX = distrib(gen);
-        int randY = distrib(gen);
-
-        int offsets[5][2] = {
-            {0, 0},
-            {1, 0},
-            {-1, 0},
-            {0, 1},
-            {0, -1}
-        };
-
-        for (auto& offset : offsets) {
-            int newX = randX + offset[0];
-            int newY = randY + offset[1];
-            if (newX >= 0 && newX < GRIDSIZE && newY >= 0 && newY < GRIDSIZE) {
-                grid[newX][newY] = 100.f;
-                greenCrosses.emplace_back(newX, newY); // Record green cross position
+// Function to simulate stdin processing
+void processInput() {
+    std::string line;
+    while (true) {
+        {
+            std::lock_guard<std::mutex> lock(inputMutex);
+            if (!mouseInput.str().empty()) {
+                std::getline(mouseInput, line);
+                if (!line.empty()) {
+                    std::cout << "Processed input: " << line << std::endl;
+                }
             }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
-// Helper function to calculate the distance to the closest green cross
-float getDistanceToNearestCross(int x, int y) {
-    float minDistance = std::numeric_limits<float>::max();
-    for (const auto& cross : greenCrosses) {
-        int crossX = cross.first;
-        int crossY = cross.second;
-        float distance = std::sqrt((x - crossX) * (x - crossX) + (y - crossY) * (y - crossY));
-        if (distance < minDistance) {
-            minDistance = distance;
-        }
-    }
-    return minDistance;
-}
+int main(int argc, char* argv[]) {
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Mouse to stdin Simulation");
 
-// Helper function to calculate color based on distance
-sf::Color getColorFromDistance(float distance) {
-    float maxDistance = GRIDSIZE / 3.0f; // Define max distance for full red
-    distance = std::min(distance, maxDistance); // Cap the distance at maxDistance
-
-    // Normalize distance to range [0, 1]
-    float ratio = distance / maxDistance;
-
-    // Green to Yellow: Increase red while keeping green at max
-    if (ratio <= 0.5f) {
-        int red = static_cast<int>(ratio * 2 * 255); // Scale [0, 0.5] to [0, 255]
-        return sf::Color(red, 255, 0);
-    }
-    // Yellow to Red: Decrease green while keeping red at max
-    else {
-        int green = static_cast<int>((1 - ratio) * 2 * 255); // Scale [0.5, 1] to [255, 0]
-        return sf::Color(255, green, 0);
-    }
-}
-
-
-int main() {
-    randomise();
-    sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation");
-    window.setFramerateLimit(FRAMELIMIT);
+    // Start the input processing thread
+    std::thread inputThread(processInput);
+    inputThread.detach();
 
     while (window.isOpen()) {
         sf::Event event;
-
         while (window.pollEvent(event)) {
-            switch (event.type){
-
-            case sf::Event::Closed:
+            if (event.type == sf::Event::Closed) {
                 window.close();
-                break;
-            
-            case sf::Event::MouseButtonPressed:
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    std::cout << "Here" << std::endl;
+                    int x = event.mouseButton.x;
+                    int y = event.mouseButton.y;
+
+                    // Redirect mouse click info to the simulated stdin
+                    {
+                        std::lock_guard<std::mutex> lock(inputMutex);
+                        mouseInput << "MouseClick " << x << " " << y << "\n";
+                    }
                 }
-                break;
-
-            default:
-                break;
-
             }
         }
-
 
         window.clear(sf::Color::Black);
-
-        for (int x = 0; x < GRIDSIZE; x++) {
-            for (int y = 0; y < GRIDSIZE; y++) {
-                sf::RectangleShape block;
-                block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
-                block.setPosition(x * MULTIPLYFACTOR, y * MULTIPLYFACTOR);
-
-                // Determine the color based on distance
-                if (grid[x][y] == 100.f) {
-                    block.setFillColor(sf::Color::Black);
-                } else {
-                    float distance = getDistanceToNearestCross(x, y);
-                    block.setFillColor(getColorFromDistance(distance));
-                }
-
-                window.draw(block);
-            }
-        }
-
         window.display();
     }
 
