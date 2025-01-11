@@ -28,7 +28,7 @@ Will generate `mine` file.
 
 ## Screenshots
 ![window](window.png)
-![window](pictures/log.png)
+![window](/pictures/log.png)
 
 
 
