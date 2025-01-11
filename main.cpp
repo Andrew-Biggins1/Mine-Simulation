@@ -33,15 +33,7 @@ void randomise(){
 
         uniform_int_distribution<> distrib(0, GRIDSIZE-1);
 
-        int offsets[5][2] = {
-            {0, 0},   
-            {1, 0},   
-            {-1, 0},  
-            {0, 1},   
-            {0, -1}   
-        };
-
-
+        int offsets[5][2] = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         int randX = distrib(gen);
         int randY = distrib(gen);
 
@@ -57,8 +49,8 @@ void randomise(){
 
 }
 
-// Calculate Euclidean distance
-float getDistance(int x, int y){
+// Calculate Euclidean distance for closest
+float getClosestDistance(int x, int y){
 
     int min = 99999;
     int vSize = coords.size();
@@ -78,17 +70,43 @@ float getDistance(int x, int y){
     return min;
 }
 
-// Update grid values after user clicks
-void updateGrid(int x, int y){
-    
+// Calculate Euclidean distance
+float getDistance(int x1, int x2, int y1, int y2){
+    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
+
+// Update grid values after user clicks
+void updateGrid(int x2, int y2) {
+
+    int radius = strength * 10;
+    float maxDamage = strength * 5;
+
+    // Loop over a square bounding box around the affected area
+    for (int x1 = max(0, x1 - radius); x1 <= min(GRIDSIZE - 1, x2 + radius); ++x1) {
+        for (int y1 = max(0, y2 - radius); y1 <= min(GRIDSIZE - 1, y2 + radius); ++y1) {
+            // Get distance from mouse position
+            float distance = getDistance(x1, x2, y1, y2);
+
+            if (distance <= radius) {
+                grid[x1][y1] += maxDamage * (1.0f - distance / radius);
+            }
+        }
+    }
+}
+
+void isBlack(){
+    for (int x; x < GRIDSIZE; x++){
+        for (int y; y < GRIDSIZE; y++){
+            if (grid[x][y] > 149){
+                cout << "FRACTURE: " << x << "," << y << endl;
+            }
+        }
+    }
+}
+
 
 // Main Function
 int main(int argc, char* argv[]){
-
-    cout << "Current strength: " << strength << endl;
-    cout << "Number of strong spots: " << RANDNUM << endl;
-    cout << "window size: " << WINDOWSIZE << endl;
 
     if (argc < 2){
         cerr << "Usage " << argv[0] << ": please provide an integer for seismic strength" << endl;
@@ -102,6 +120,13 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    cout << "-----------------------------" << endl;
+    cout << "Current strength: " << strength << endl;
+    cout << "Number of strong spots: " << RANDNUM << endl;
+    cout << "Window size: " << WINDOWSIZE << endl;
+    cout << "Grid size: " << GRIDSIZE << endl;
+    cout << "-----------------------------" << endl;
+
     randomise();
     sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation", sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(FRAMELIMIT);
@@ -109,7 +134,7 @@ int main(int argc, char* argv[]){
     for (int x = 0; x < GRIDSIZE; x++){
         for (int y = 0; y < GRIDSIZE; y++){
             
-            grid[x][y] = getDistance(x,y);
+            grid[x][y] = getClosestDistance(x,y);
         }
     }
 
@@ -131,8 +156,8 @@ int main(int argc, char* argv[]){
                     int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
                     int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
                     
-
-                    //updateGrid(x, y);
+                    updateGrid(x, y);
+                    isBlack();
 
                 }
 
