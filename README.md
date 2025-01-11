@@ -27,11 +27,8 @@ Will generate `mine` file.
 
 
 ## Screenshots
-<p align="top">
-  <img src="pictures/window.png" width="320" alt="window/>
-  </p>
-<p align="center">
-  <img src="pictures/log.png" width="150" alt="Log"/>
-</p>
+<img src="pictures/window.png" width="300" />
+<img src="pictures/log.png" width="150" />
+
 
 
