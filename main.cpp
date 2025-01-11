@@ -11,7 +11,6 @@
 #define WINDOWSIZE 800
 #define FRAMELIMIT 60
 #define BLOCKSIZE 10
-#define RANDNUM 10
 #define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
 
@@ -24,11 +23,12 @@ vector<vector<float>> grid(GRIDSIZE, vector<float>(GRIDSIZE, 0.0f));
 vector<pair<int, int>> coords;
 vector<pair<int, int>> fractures;
 int strength = 0;
+int randNum = 10;
 
 // Function to randomise vector for rock strengths
 void randomise(){
 
-    for (int i = 0; i < RANDNUM; i++){
+    for (int i = 0; i < randNum; i++){
         random_device rd; 
         mt19937 gen(rd()); 
 
@@ -136,10 +136,14 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    if (argc > 2){
+        randNum = atoi(argv[2]);
+    }
+
     cout << endl;
     cout << "--------------------------------" << endl;
     cout << "Current strength: " << strength << endl;
-    cout << "Number of strong spots: " << RANDNUM << endl;
+    cout << "Number of strong spots: " << randNum << endl;
     cout << "Window size: " << WINDOWSIZE << endl;
     cout << "Grid size: " << GRIDSIZE << endl;
     cout << "--------------------------------";
