@@ -27,8 +27,10 @@ Will generate `mine` file.
 
 
 ## Screenshots
-<img src="pictures/window.png" width="300" />
-<img src="pictures/log.png" width="150" />
+<img src="/pictures/window.png" width="300" />
+<img src="/pictures/log.png" width="150" />
+
+![alt text](https://github.com/Andrew-Biggins1/Mine-Simulation/blob/main/pictures/window.png?raw=true)
 
 
 
