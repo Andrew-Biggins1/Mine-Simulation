@@ -78,21 +78,40 @@ float getDistance(int x, int y){
     return min;
 }
 
+// Update grid values after user clicks
+void updateGrid(int x, int y){
+    
+}
+
 // Main Function
 int main(int argc, char* argv[]){
 
+    cout << "Current strength: " << strength << endl;
+    cout << "Number of strong spots: " << RANDNUM << endl;
+    cout << "window size: " << WINDOWSIZE << endl;
+
     if (argc < 2){
-        cerr << "Usage " << argv[0] << ": Please provide an integer for seismic strength" << endl;
+        cerr << "Usage " << argv[0] << ": please provide an integer for seismic strength" << endl;
         return -1;
     }
 
     strength = atoi(argv[1]);
 
+    if (strength > 10 | strength < 1){
+        cerr << "Usage " << argv[0] << ": please provide an integer between 1-10" << endl;
+        return -1;
+    }
+
     randomise();
-    sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation");
+    sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation", sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(FRAMELIMIT);
 
-
+    for (int x = 0; x < GRIDSIZE; x++){
+        for (int y = 0; y < GRIDSIZE; y++){
+            
+            grid[x][y] = getDistance(x,y);
+        }
+    }
 
     while(window.isOpen()){
         
@@ -106,14 +125,22 @@ int main(int argc, char* argv[]){
                 break;
             
             case sf::Event::MouseButtonPressed:
-                if (event.mouseButton.button == sf::Mouse::Left) {
 
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    
                     int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
                     int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
+                    
 
-                    cout << "x: " << x << ", ";
-                    cout << "y: " << y << ", ";
-                    cout << "dmg: " << grid[x][y] << endl; 
+                    //updateGrid(x, y);
+
+                }
+
+ 
+                else if (event.mouseButton.button == sf::Mouse::Right) {
+                    int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
+                    int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
+                    cout << "damage: " << grid[x][y] << " (position: " << x << ", " << y << ")" << endl;
                 }
                 break;
 
@@ -127,8 +154,7 @@ int main(int argc, char* argv[]){
 
         for (int x = 0; x < GRIDSIZE; x++){
             for (int y = 0; y < GRIDSIZE; y++){
-                
-                grid[x][y] = getDistance(x,y);
+
 
                 sf::RectangleShape block;
                 block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
@@ -153,10 +179,10 @@ int main(int argc, char* argv[]){
                     int green = static_cast<int>(255 * (1 - factor * 1.0f));
                     block.setFillColor(sf::Color(red, green, 0));
                 }
-
+                
 
                 else {
-                    block.setFillColor(sf::Color::White);
+                    block.setFillColor(sf::Color::Black);
                 }
 
                 window.draw(block);
