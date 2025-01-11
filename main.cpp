@@ -22,6 +22,7 @@ using namespace std;
 // Global Variables
 vector<vector<float>> grid(GRIDSIZE, vector<float>(GRIDSIZE, 0.0f));
 vector<pair<int, int>> coords;
+vector<pair<int, int>> fractures;
 int strength = 0;
 
 // Function to randomise vector for rock strengths
@@ -81,10 +82,9 @@ void updateGrid(int x2, int y2) {
     int radius = strength * 10;
     float maxDamage = strength * 5;
 
-    // Loop over a square bounding box around the affected area
     for (int x1 = max(0, x1 - radius); x1 <= min(GRIDSIZE - 1, x2 + radius); ++x1) {
         for (int y1 = max(0, y2 - radius); y1 <= min(GRIDSIZE - 1, y2 + radius); ++y1) {
-            // Get distance from mouse position
+
             float distance = getDistance(x1, x2, y1, y2);
 
             if (distance <= radius) {
@@ -94,41 +94,61 @@ void updateGrid(int x2, int y2) {
     }
 }
 
+// Check if fracture coordinate has been printed: 1 if printed, else 0
+int fracCheck(int x, int y){
+    pair<int, int> temp = {x,y};
+    for (auto& frac : fractures){
+        if (frac == temp){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Check if a black spot is present -> fracture
 void isBlack(){
     for (int x; x < GRIDSIZE; x++){
         for (int y; y < GRIDSIZE; y++){
             if (grid[x][y] > 149){
+                if (fracCheck(x, y) == 0){
                 cout << "FRACTURE: " << x << "," << y << endl;
+                cout << "--------------------------------" << endl;
+                pair<int, int> temp = {x,y};
+                fractures.emplace_back(temp);
+                }
             }
         }
     }
 }
 
-
 // Main Function
 int main(int argc, char* argv[]){
 
     if (argc < 2){
-        cerr << "Usage " << argv[0] << ": please provide an integer for seismic strength" << endl;
+        cout << "Usage " << argv[0] << ": please provide an integer for seismic strength" << endl;
         return -1;
     }
 
     strength = atoi(argv[1]);
 
     if (strength > 10 | strength < 1){
-        cerr << "Usage " << argv[0] << ": please provide an integer between 1-10" << endl;
+        cout << "Usage " << argv[0] << ": please provide an integer between 1-10" << endl;
         return -1;
     }
 
-    cout << "-----------------------------" << endl;
+    cout << endl;
+    cout << "--------------------------------" << endl;
     cout << "Current strength: " << strength << endl;
     cout << "Number of strong spots: " << RANDNUM << endl;
     cout << "Window size: " << WINDOWSIZE << endl;
     cout << "Grid size: " << GRIDSIZE << endl;
-    cout << "-----------------------------" << endl;
+    cout << "--------------------------------";
+    cout << endl;
 
     randomise();
+
     sf::RenderWindow window(sf::VideoMode(WINDOWSIZE, WINDOWSIZE), "Mine Simulation", sf::Style::Titlebar | sf::Style::Close);
+
     window.setFramerateLimit(FRAMELIMIT);
 
     for (int x = 0; x < GRIDSIZE; x++){
@@ -143,9 +163,11 @@ int main(int argc, char* argv[]){
         sf::Event event;
 
         while (window.pollEvent(event)) {
+            
             switch (event.type){
 
             case sf::Event::Closed:
+                cout << endl;
                 window.close();
                 break;
             
@@ -165,7 +187,9 @@ int main(int argc, char* argv[]){
                 else if (event.mouseButton.button == sf::Mouse::Right) {
                     int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
                     int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
-                    cout << "damage: " << grid[x][y] << " (position: " << x << ", " << y << ")" << endl;
+                    int temp = static_cast<int>(round(grid[x][y]));
+                    cout << "damage: " << temp << " (position: " << x << ", " << y << ")" << endl;
+                    cout << "--------------------------------" << endl;
                 }
                 break;
 
@@ -184,12 +208,13 @@ int main(int argc, char* argv[]){
                 sf::RectangleShape block;
                 block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
                 block.setPosition(x*MULTIPLYFACTOR,y*MULTIPLYFACTOR);
+
                 if (grid[x][y] == 0){
                     block.setFillColor(sf::Color(0,255,0));
                 }
+
                 // Green/Yellow
                 else if (grid[x][y] < 30) {
-                    // Normalize grid[x][y] to the range [0, 1]
                     float factor = grid[x][y] / 30.0f;
                     int red = static_cast<int>((255 * factor) * 1.0f);
                     int green = 255;
@@ -198,14 +223,13 @@ int main(int argc, char* argv[]){
 
                 // Yellow/Red
                 else if (grid[x][y] < 150) {
-                    // Normalize grid[x][y] to the range [0, 1]
-                    float factor = (grid[x][y] - 30.0f) / 120.0f; // Last float must be < x - above statement < y
+                    float factor = (grid[x][y] - 30.0f) / 120.0f;
                     int red = 255; 
                     int green = static_cast<int>(255 * (1 - factor * 1.0f));
                     block.setFillColor(sf::Color(red, green, 0));
                 }
                 
-
+                // Black if damage > 149
                 else {
                     block.setFillColor(sf::Color::Black);
                 }
