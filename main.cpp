@@ -107,11 +107,11 @@ int fracCheck(int x, int y){
 
 // Check if a black spot is present -> fracture
 void isBlack(){
-    for (int x; x < GRIDSIZE; x++){
-        for (int y; y < GRIDSIZE; y++){
+    for (int x = 0; x < GRIDSIZE; x++){
+        for (int y = 0; y < GRIDSIZE; y++){
             if (grid[x][y] > 149){
                 if (fracCheck(x, y) == 0){
-                cout << "FRACTURE: " << x << "," << y << endl;
+                cout << "FRACTURE: " << x << ", " << y << endl;
                 cout << "--------------------------------" << endl;
                 pair<int, int> temp = {x,y};
                 fractures.emplace_back(temp);
@@ -192,7 +192,7 @@ int main(int argc, char* argv[]){
                     int x = static_cast<int>(event.mouseButton.x / static_cast<float>(MULTIPLYFACTOR));
                     int y = static_cast<int>(event.mouseButton.y / static_cast<float>(MULTIPLYFACTOR));
                     int temp = static_cast<int>(round(grid[x][y]));
-                    cout << "damage: " << temp << " (position: " << x << ", " << y << ")" << endl;
+                    cout << "Damage: " << temp << " (" << x << ", " << y << ")" << endl;
                     cout << "--------------------------------" << endl;
                 }
                 break;
