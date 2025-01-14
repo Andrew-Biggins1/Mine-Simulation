@@ -6,13 +6,13 @@
 #include <algorithm>
 #include <array>
 
-// Preprocessor Variables
+// Preprocessor Variables (can modify)
 #define GRIDSIZE 200
 #define WINDOWSIZE 800
-#define FRAMELIMIT 60
-#define BLOCKSIZE 10
-#define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
+// Preprocessor Variables (don't modify)
+#define FRAMELIMIT 60
+#define MULTIPLYFACTOR WINDOWSIZE/GRIDSIZE
 
 // Namespaces
 using namespace std;
@@ -25,12 +25,17 @@ vector<pair<int, int>> fractures;
 int strength = 0;
 int randNum = 10;
 
-// Function to randomise vector for rock strengths
+/*
+@purpose: To create a number of strong spots in the grid at random locations
+
+@return: None
+*/
 void randomise(){
 
+    random_device rd; 
+    mt19937 gen(rd()); 
+
     for (int i = 0; i < randNum; i++){
-        random_device rd; 
-        mt19937 gen(rd()); 
 
         uniform_int_distribution<> distrib(0, GRIDSIZE-1);
 
@@ -50,7 +55,30 @@ void randomise(){
 
 }
 
-// Calculate Euclidean distance for closest
+/* 
+@purpose: Calculate the Euclidean distance between two points on the graph
+
+@param x1: x-coordinate of the first point
+@param x2: x-coordinate of the second point
+@param y1: y-coordinate of the first point
+@param y2: y-coordinate of the second point
+
+@return: Euclidean distance between the two points
+*/
+
+float getDistance(int x1, int x2, int y1, int y2){
+    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+
+/*
+@purpose: Get the distance to the closest strong spot
+
+@param x: x-coordinate of the point whose distance we want to calculate to the closest strong spot
+@param y: y-coordinate of the point whose distance we want to calculate to the closest strong spot
+
+@return: Distance between our point and the closest strong spot
+*/
+
 float getClosestDistance(int x, int y){
 
     int min = 99999;
@@ -61,7 +89,7 @@ float getClosestDistance(int x, int y){
         int tempX = coords[i].first;
         int tempY = coords[i].second;
 
-        float temp = sqrt((x - tempX) * (x - tempX) + (y - tempY) * (y - tempY));
+        float temp = getDistance(x, tempX, y, tempY);
 
         if (temp < min){
             min = temp;
@@ -71,12 +99,14 @@ float getClosestDistance(int x, int y){
     return min;
 }
 
-// Calculate Euclidean distance
-float getDistance(int x1, int x2, int y1, int y2){
-    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-}
+/*
+@purpose: Update the relevant surrounding grid after a user clicks
 
-// Update grid values after user clicks
+@param x2: The x-coordinate of where the user clicked
+@param y2: The y-coordinate of where the user clicked
+@return: None
+*/
+
 void updateGrid(int x2, int y2) {
 
     int radius = strength * 10;
@@ -88,13 +118,22 @@ void updateGrid(int x2, int y2) {
             float distance = getDistance(x1, x2, y1, y2);
 
             if (distance <= radius) {
-                grid[x1][y1] += maxDamage * (1.0f - distance / radius);
+                float* gridPtr = &grid[x1][y1];
+                *gridPtr += maxDamage * (1.0f - distance / radius);
             }
         }
     }
 }
 
-// Check if fracture coordinate has been printed: 1 if printed, else 0
+/*
+@purpose: Check if we have already printed that fracture location -> ensure we aren't printing duplicate coordinates
+
+@param x: x-coordinate of the point we want to check
+@param y: y-coordinate of the point we want to check
+
+@return: 1 if already printed (in fractures), 0 if not
+ */
+
 int fracCheck(int x, int y){
     pair<int, int> temp = {x,y};
     for (auto& frac : fractures){
@@ -105,11 +144,17 @@ int fracCheck(int x, int y){
     return 0;
 }
 
-// Check if a black spot is present -> fracture
+/* 
+@purpose: Check our grid for any fractures: appears black in the simulation -> stdout with coordinates if so
+
+@return: None
+*/
+
 void isBlack(){
     for (int x = 0; x < GRIDSIZE; x++){
         for (int y = 0; y < GRIDSIZE; y++){
-            if (grid[x][y] > 149){
+            float* loc = &grid[x][y];
+            if (*loc > 149){
                 if (fracCheck(x, y) == 0){
                 cout << "FRACTURE: " << x << ", " << y << endl;
                 cout << "--------------------------------" << endl;
@@ -121,7 +166,15 @@ void isBlack(){
     }
 }
 
-// Main Function
+/*
+@purpose: Run error checking and run simulation
+
+@param argc: Number of arguments passed through the program
+@param argv: The arguments being passed through the program
+
+@return: 0 if successful, else != 0
+*/
+
 int main(int argc, char* argv[]){
 
     if (argc < 2){
@@ -210,7 +263,7 @@ int main(int argc, char* argv[]){
 
 
                 sf::RectangleShape block;
-                block.setSize(sf::Vector2f(BLOCKSIZE, BLOCKSIZE));
+                block.setSize(sf::Vector2f(MULTIPLYFACTOR, MULTIPLYFACTOR));
                 block.setPosition(x*MULTIPLYFACTOR,y*MULTIPLYFACTOR);
 
                 if (grid[x][y] == 0){

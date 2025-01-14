@@ -20,6 +20,10 @@ Will generate `mine` file.
 ./mine 5 15
 ```
 
+**Preprocessor Variables:** <br>
+`GRIDSIZE` Adjust the size of data representation <br>
+`WINDOWSIZE` Ajust the size of the window
+
 **Left click**: Create a seismic wave at mouse location <br>
 **Right click**: Display the current damage at mouse location in stdout
 
